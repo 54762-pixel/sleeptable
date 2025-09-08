@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ตารางการนอนให้เพียงพอ</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #2e8b57;
+      text-align: center;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    select, input[type="time"], button {
+      font-size: 16px;
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    button {
+      background-color: #2e8b57;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #246b46;
+    }
+
+    .result, .health-table {
+      margin-top: 25px;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #e0f2f1;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 14px;
+      margin-top: 30px;
+      color: #777;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🛌 ตารางการนอนให้เพียงพอ</h1>
+
+    <label for="mode">เลือกโหมดการคำนวณ:</label><br />
+    <select id="mode" onchange="switchMode()">
+      <option value="wake">ฉันต้องการตื่นนอนเวลา...</option>
+      <option value="sleep">ฉันจะเข้านอนเวลา...</option>
+    </select>
+
+    <br />
+    <label for="timeInput" id="timeLabel">เลือกเวลาที่คุณต้องการตื่น:</label><br />
+    <input type="time" id="timeInput" />
+
+    <br />
+    <button onclick="calculate()">คำนวณ</button>
+
+    <div class="result" id="result"></div>
+
+    <div class="health-table">
+      <h3>📊 ข้อมูลสุขภาพการนอน</h3>
+      <table>
+        <tr>
+          <th>หัวข้อ</th>
+          <th>คำแนะนำ</th>
+        </tr>
+        <tr>
+          <td>ระยะเวลานอนที่เหมาะสม</td>
+          <td>7-9 ชั่วโมงต่อคืน สำหรับผู้ใหญ่</td>
+        </tr>
+        <tr>
+          <td>จำนวนรอบการนอน</td>
+          <td>ควรนอน 4-6 รอบ (รอบละ ~90 นาที)</td>
+        </tr>
+        <tr>
+          <td>เวลาในการเข้าสู่การหลับ</td>
+          <td>ประมาณ 10-20 นาที</td>
+        </tr>
+        <tr>
+          <td>ควรงดหน้าจอ</td>
+          <td>อย่างน้อย 30 นาที ก่อนนอน</td>
+        </tr>
+        <tr>
+          <td>ควรงดกาแฟ / ชา</td>
+          <td>หลังเวลา 15:00 น.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <footer>สร้างเพื่อส่งเสริมการนอนหลับอย่างมีคุณภาพ 💤</footer>
+
+  <script>
+    function switchMode() {
+      const mode = document.getElementById("mode").value;
+      const label = document.getElementById("timeLabel");
+
+      if (mode === "wake") {
+        label.textContent = "เลือกเวลาที่คุณต้องการตื่น:";
+      } else {
+        label.textContent = "เลือกเวลาที่คุณจะเข้านอน:";
+      }
+
+      // เคลียร์ผลลัพธ์เดิม
+      document.getElementById("result").innerHTML = "";
+    }
+
+    function calculate() {
+      const mode = document.getElementById("mode").value;
+      const inputTime = document.getElementById("timeInput").value;
+      const resultDiv = document.getElementById("result");
+
+      if (!inputTime) {
+        alert("กรุณาเลือกเวลา");
+        return;
+      }
+
+      const [hour, minute] = inputTime.split(":").map(Number);
+      const baseTime = new Date();
+      baseTime.setHours(hour, minute, 0, 0);
+
+      let html = "<ul>";
+
+      if (mode === "wake") {
+        // คำนวณเวลานอนที่เหมาะสม
+        html = "<h3>เวลาที่แนะนำให้เข้านอน:</h3><ul>";
+        for (let cycle = 6; cycle >= 3; cycle--) {
+          const totalMinutes = (cycle * 90) + 15;
+          const sleepTime = new Date(baseTime.getTime() - totalMinutes * 60000);
+          const h = sleepTime.getHours().toString().padStart(2, '0');
+          const m = sleepTime.getMinutes().toString().padStart(2, '0');
+          html += `<li>⏰ ${h}:${m} น. (${cycle} รอบ)</li>`;
+        }
+      } else {
+        // คำนวณเวลาตื่นที่เหมาะสม
+        html = "<h3>เวลาที่แนะนำให้ตื่น:</h3><ul>";
+        for (let cycle = 3; cycle <= 6; cycle++) {
+          const totalMinutes = (cycle * 90) + 15;
+          const wakeTime = new Date(baseTime.getTime() + totalMinutes * 60000);
+          const h = wakeTime.getHours().toString().padStart(2, '0');
+          const m = wakeTime.getMinutes().toString().padStart(2, '0');
+          html += `<li>⏰ ${h}:${m} น. (${cycle} รอบ)</li>`;
+        }
+      }
+
+      html += "</ul>";
+      resultDiv.innerHTML = html;
+    }
+  </script>
+
+</body>
+</html>
